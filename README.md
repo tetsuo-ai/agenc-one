@@ -12,6 +12,10 @@
 </p>
 
 <p align="center">
+  <img src="assets/agenc-one-device.jpg" width="600" alt="AGENC ONE Device" />
+</p>
+
+<p align="center">
   <a href="https://agencone.com">Website</a> &middot;
   <a href="https://docs.agenc.tech/docs/">Documentation</a> &middot;
   <a href="https://github.com/tetsuo-ai/AgenC">Protocol</a> &middot;

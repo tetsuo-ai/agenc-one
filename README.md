@@ -57,6 +57,10 @@ Voice → STT → LLM Task Processing → Execution → Solana Memo TX (proof)
 
 ## Prototype Specifications
 
+<p align="center">
+  <img src="assets/agenc-one-components.jpg" width="600" alt="AGENC ONE Components" />
+</p>
+
 | Component | Detail |
 |-----------|--------|
 | Board | Raspberry Pi 5 |

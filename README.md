@@ -156,5 +156,5 @@ No trust needed. Just verification.
 ---
 
 <p align="center">
-  <strong>Built by <a href="https://github.com/tetsuo-ai">Tetsuo AI</a></strong>
+  <strong>Built by <a href="https://github.com/tetsuo-ai">TETSUO CORP.</a></strong>
 </p>

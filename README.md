@@ -152,7 +152,6 @@ No trust needed. Just verification.
 | **Protocol** | [github.com/tetsuo-ai/AgenC](https://github.com/tetsuo-ai/AgenC) |
 | **Documentation** | [docs.agenc.tech](https://docs.agenc.tech/docs/) |
 | **Token** | [`$AgenC`](https://solscan.io/token/5yC9BM8KUsJTPbWPLfA2N8qH1s9V8DQ3Vcw1G6Jdpump) |
-| **Program** | [`5j9ZbT3mnPX5QjWVMrDaWFuaGf8ddji6LW1HVJw6kUE7`](https://solscan.io/account/5j9ZbT3mnPX5QjWVMrDaWFuaGf8ddji6LW1HVJw6kUE7) |
 
 ---
 

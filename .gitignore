@@ -1,0 +1,5 @@
+# Secrets
+pi-source/.agenc/wallet.json
+pi-source/.agenc/config.json
+*.env
+pi-source/.agenc/config.json

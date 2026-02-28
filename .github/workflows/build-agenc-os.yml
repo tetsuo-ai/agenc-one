@@ -43,6 +43,9 @@ jobs:
           git clone -b scarthgap --depth 1 git://git.yoctoproject.org/meta-raspberrypi.git
           git clone -b scarthgap --depth 1 git://git.openembedded.org/meta-openembedded.git
 
+      - name: Prepare build directory
+        run: mkdir -p ~/build/sstate-cache ~/build/downloads
+
       - name: Cache Yocto sstate
         uses: actions/cache@v4
         with:
@@ -56,31 +59,29 @@ jobs:
         run: |
           cd $HOME
           source poky/oe-init-build-env build
-
           cat > conf/bblayers.conf << EOF
           POKY_BBLAYERS_CONF_VERSION = "2"
           BBPATH = "\${TOPDIR}"
           BBFILES ?= ""
-          BBLAYERS ?= " \
-            $HOME/poky/meta \
-            $HOME/poky/meta-poky \
-            $HOME/poky/meta-yocto-bsp \
-            $HOME/meta-raspberrypi \
-            $HOME/meta-openembedded/meta-oe \
-            $HOME/meta-openembedded/meta-python \
-            $HOME/meta-openembedded/meta-networking \
-            $GITHUB_WORKSPACE/meta-agenc \
+          BBLAYERS ?= " \\
+            $HOME/poky/meta \\
+            $HOME/poky/meta-poky \\
+            $HOME/poky/meta-yocto-bsp \\
+            $HOME/meta-raspberrypi \\
+            $HOME/meta-openembedded/meta-oe \\
+            $HOME/meta-openembedded/meta-python \\
+            $HOME/meta-openembedded/meta-networking \\
+            $GITHUB_WORKSPACE/meta-agenc \\
           "
           EOF
-
-          cat >> conf/local.conf << CONF
+          cat >> conf/local.conf << EOF
           MACHINE = "raspberrypi0-2w-64"
           BB_NUMBER_THREADS = "4"
           PARALLEL_MAKE = "-j 4"
           INHERIT += "rm_work"
-          DL_DIR = "${TOPDIR}/downloads"
-          SSTATE_DIR = "${TOPDIR}/sstate-cache"
-          CONF
+          DL_DIR = "\${TOPDIR}/downloads"
+          SSTATE_DIR = "\${TOPDIR}/sstate-cache"
+          EOF
 
       - name: Build core-image-minimal
         run: |

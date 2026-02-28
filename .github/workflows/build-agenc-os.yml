@@ -1,0 +1,88 @@
+name: Build AgenC OS
+
+on:
+  push:
+    paths:
+      - 'meta-agenc/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo apt-get clean
+          df -h
+
+      - name: Install Yocto dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gawk wget git diffstat unzip texinfo \
+            gcc build-essential chrpath socat cpio python3 python3-pip \
+            python3-pexpect xz-utils debianutils iputils-ping python3-git \
+            python3-jinja2 python3-subunit zstd liblz4-tool file locales libacl1
+          sudo locale-gen en_US.UTF-8
+
+      - name: Clone Yocto layers
+        run: |
+          cd $HOME
+          git clone -b scarthgap --depth 1 git://git.yoctoproject.org/poky.git
+          git clone -b scarthgap --depth 1 git://git.yoctoproject.org/meta-raspberrypi.git
+          git clone -b scarthgap --depth 1 git://git.openembedded.org/meta-openembedded.git
+
+      - name: Cache Yocto sstate
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/build/sstate-cache
+            ~/build/downloads
+          key: yocto-sstate-${{ hashFiles('meta-agenc/**') }}
+          restore-keys: yocto-sstate-
+
+      - name: Configure build
+        run: |
+          cd $HOME
+          source poky/oe-init-build-env build
+
+          cat > conf/bblayers.conf << EOF
+          POKY_BBLAYERS_CONF_VERSION = "2"
+          BBPATH = "\${TOPDIR}"
+          BBFILES ?= ""
+          BBLAYERS ?= " \
+            $HOME/poky/meta \
+            $HOME/poky/meta-poky \
+            $HOME/poky/meta-yocto-bsp \
+            $HOME/meta-raspberrypi \
+            $HOME/meta-openembedded/meta-oe \
+            $HOME/meta-openembedded/meta-python \
+            $HOME/meta-openembedded/meta-networking \
+            $GITHUB_WORKSPACE/meta-agenc \
+          "
+          EOF
+
+          cat >> conf/local.conf << CONF
+          MACHINE = "raspberrypi0-2w-64"
+          BB_NUMBER_THREADS = "4"
+          PARALLEL_MAKE = "-j 4"
+          CONF
+
+      - name: Build core-image-minimal
+        run: |
+          cd $HOME
+          source poky/oe-init-build-env build
+          bitbake core-image-minimal
+
+      - name: Upload image
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: agenc-os-image
+          path: ~/build/tmp/deploy/images/raspberrypi0-2w-64/core-image-minimal-raspberrypi0-2w-64.*
+          retention-days: 7

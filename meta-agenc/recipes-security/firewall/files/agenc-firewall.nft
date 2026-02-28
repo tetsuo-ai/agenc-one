@@ -1,0 +1,37 @@
+#!/usr/sbin/nft -f
+# AgenC ONE - Outbound-only firewall
+# Blocks all inbound except established connections and SSH (for debug)
+
+flush ruleset
+
+table inet agenc_filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+
+        # Allow loopback
+        iif "lo" accept
+
+        # Allow established/related connections
+        ct state established,related accept
+
+        # Allow SSH (debug builds only - remove for production)
+        tcp dport 22 accept
+
+        # Allow DHCP
+        udp sport 67 udp dport 68 accept
+
+        # Drop everything else
+        counter drop
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+
+        # Allow all outbound (agent needs internet for API calls)
+        ct state new,established,related accept
+    }
+}

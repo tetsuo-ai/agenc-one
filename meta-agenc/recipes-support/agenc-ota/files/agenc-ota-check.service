@@ -1,0 +1,10 @@
+[Unit]
+Description=AgenC OTA Update Check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/agenc/scripts/agenc-ota-check.sh
+User=root
+EnvironmentFile=-/data/agenc/env

@@ -58,6 +58,12 @@ IMAGE_INSTALL += " \
     wifi-config \
 "
 
+# OTA Updates
+IMAGE_INSTALL += " \
+    rauc \
+    agenc-ota \
+"
+
 # System management
 IMAGE_INSTALL += " \
     systemd \

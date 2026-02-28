@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 360
 
     steps:
@@ -17,9 +17,15 @@ jobs:
 
       - name: Free disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost /usr/share/swift
           sudo apt-get clean
+          docker image prune -af || true
           df -h
+
+      - name: Allow unprivileged user namespaces
+        run: |
+          sudo sysctl kernel.apparmor_restrict_unprivileged_userns=0 2>/dev/null || true
+          sudo sysctl kernel.unprivileged_userns_clone=1 2>/dev/null || true
 
       - name: Install Yocto dependencies
         run: |
@@ -71,6 +77,9 @@ jobs:
           MACHINE = "raspberrypi0-2w-64"
           BB_NUMBER_THREADS = "4"
           PARALLEL_MAKE = "-j 4"
+          INHERIT += "rm_work"
+          DL_DIR = "${TOPDIR}/downloads"
+          SSTATE_DIR = "${TOPDIR}/sstate-cache"
           CONF
 
       - name: Build core-image-minimal

@@ -1,0 +1,15 @@
+[Unit]
+Description=Create AgenC data directories
+After=agenc-data.mount
+Requires=agenc-data.mount
+ConditionPathIsMountPoint=/data
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/mkdir -p /data/agenc /data/keystore /data/agenc/logs
+ExecStart=/bin/chown -R agenc:agenc /data/agenc
+ExecStart=/bin/chmod 700 /data/keystore
+
+[Install]
+WantedBy=multi-user.target

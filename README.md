@@ -63,7 +63,7 @@ Voice → STT → LLM Task Processing → Execution → Solana Memo TX (proof)
 
 | Component | Detail |
 |-----------|--------|
-| Board | Raspberry Pi 5 |
+| Board | Raspberry Pi Zero 2W |
 | Processor | ARM Cortex-A53 |
 | Memory | 512MB RAM |
 | Display | 1.69" SPI status display |
@@ -124,17 +124,18 @@ Voice-to-chain pipeline validated on Raspberry Pi with live devnet transactions.
 - [x] Animated status display with emotional states
 - [x] Live task feed web dashboard
 
-### Phase 2 — AgenC OS
+### Phase 2 — AgenC OS &checkmark;
 
-Custom Linux distribution purpose-built for agent execution.
+Custom Linux distribution purpose-built for agent execution. Yocto Scarthgap 5.0.16 running on Pi Zero 2W.
 
-- [ ] Yocto-based minimal image (~200MB vs ~4GB stock)
-- [ ] Boot to agent in 3-5 seconds
-- [ ] Read-only root filesystem
+- [x] Yocto-based minimal image (~1.5GB image, minimal rootfs)
+- [x] Read-only root filesystem
+- [x] Secure boot chain
+- [x] Signed OTA updates with A/B rollback
+- [x] Zero unnecessary services (no package manager, no GUI, no bloat)
+- [x] SSH access via Dropbear
 - [ ] Encrypted key storage
-- [ ] Secure boot chain
-- [ ] Signed OTA updates with A/B rollback
-- [ ] Zero unnecessary services
+- [ ] Boot to agent in 3-5 seconds
 
 ### Phase 3 — Custom Hardware
 
@@ -163,6 +164,46 @@ Purpose-designed board with Western supply chain (80%+ US/EU sourced components)
 - [ ] Escrow-backed task marketplace
 - [ ] ZK privacy for sensitive tasks
 - [ ] Governance participation from devices
+
+## Building AgenC OS
+
+### Prerequisites
+
+- Docker (for Yocto build)
+- Raspberry Pi Imager (for flashing)
+- microSD card (16GB+)
+
+### Build
+
+```bash
+cd yocto
+./build.sh
+```
+
+The build runs inside Docker and produces `agenc-os.wic` — a raw disk image targeting the Raspberry Pi Zero 2W (BCM2710, aarch64).
+
+### Flash
+
+1. Open **Raspberry Pi Imager**
+2. OS → **Use custom** → select `agenc-os.wic`
+3. Storage → select your SD card
+4. Write
+
+### First Boot
+
+AgenC OS boots to a minimal shell. To enable SSH:
+
+```bash
+sh /boot/dropbear/start-dropbear.sh
+```
+
+Then connect from any machine on the LAN:
+
+```bash
+ssh root@<pi-ip-address>
+```
+
+See [`docs/AGENC-OS-SETUP.md`](docs/AGENC-OS-SETUP.md) for detailed setup instructions.
 
 ## The Vision
 

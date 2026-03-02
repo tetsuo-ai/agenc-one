@@ -2,7 +2,7 @@
 
 ## Current State
 
-AgenC OS is running on a Raspberry Pi Zero 2W with SSH access via Dropbear.
+AgenC OS is running on a Raspberry Pi Zero 2W with SSH access via Dropbear. The agent runs as root — natively integrated into the OS, not sandboxed.
 
 ## System Info
 
@@ -16,6 +16,7 @@ AgenC OS is running on a Raspberry Pi Zero 2W with SSH access via Dropbear.
 | IP (LAN) | <PI_IP> (eth0, via USB ethernet adapter) |
 | SSH Port | 22 (Dropbear) |
 | WiFi | wlan0 detected, not configured |
+| Agent | Runs as root via systemd (agenc-runtime.service) |
 
 ## SSH Connection
 
@@ -101,6 +102,20 @@ The Yocto image ships without SSH. We install Alpine Linux's dropbear package (m
 - **Source**: Alpine Linux v3.21 aarch64 packages
 - **Dependencies**: musl libc, libutmps, libz, libskarnet (all from Alpine)
 - **Why Alpine**: Yocto rootfs uses glibc, but Alpine's musl-based dropbear is self-contained when bundled with musl libs
+
+## Security Model
+
+The agent runs as root by design. This is a single-purpose device — the agent IS the system. Security is enforced at the OS architecture level, not through process sandboxing:
+
+| Layer | Protection |
+|-------|-----------|
+| **Rootfs** | Read-only ext4 — agent can't corrupt the system even as root |
+| **Keystore** | LUKS-encrypted partition — wallet keys protected at rest |
+| **Firewall** | nftables — outbound-only, minimal attack surface |
+| **Updates** | Signed OTA via RAUC — can't install tampered code |
+| **Rollback** | A/B partitions — bad update = automatic recovery |
+
+The agent has full access to: GPIO, SPI, I2C, audio, display, WiFi management, Bluetooth, OTA triggers, system services, and `/data` partition.
 
 ## Known Issues
 

@@ -1,7 +1,7 @@
 SUMMARY = "AgenC ONE Encrypted Keystore"
 DESCRIPTION = "dm-crypt setup for /data/keystore encrypted volume"
 LICENSE = "GPL-3.0-only"
-LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c84e74ca1e4a5830e4dc9e7a7e91cf9b"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec6d293b95dea7b07891"
 
 SRC_URI = " \
     file://keystore-init.sh \

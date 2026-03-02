@@ -30,19 +30,6 @@ EOF
     install -d -m 0700 ${D}/root/.ssh
     install -m 0600 ${WORKDIR}/authorized_keys ${D}/root/.ssh/authorized_keys
 
-    # OS identification
-    cat > ${D}${sysconfdir}/os-release << 'EOF'
-ID=agenc-os
-NAME="AgenC OS"
-VERSION="2.0 (Phase 2)"
-VERSION_ID=2.0
-PRETTY_NAME="AgenC OS 2.0 — TETSUO CORP"
-HOME_URL="https://agencone.com"
-BUILD_ID="${DATETIME}"
-VARIANT="AGENC ONE"
-VARIANT_ID=agenc-one
-EOF
-
     # MOTD - shown on SSH login
     cat > ${D}${sysconfdir}/motd << 'MOTDEOF'
 

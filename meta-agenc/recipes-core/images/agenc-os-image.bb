@@ -43,7 +43,7 @@ IMAGE_INSTALL += " \
     libgpiod \
     libgpiod-tools \
     i2c-tools \
-    spi-tools \
+    python3-spidev \
 "
 
 # Security
@@ -61,11 +61,11 @@ IMAGE_INSTALL += " \
     wifi-config \
 "
 
-# OTA Updates
-IMAGE_INSTALL += " \
-    rauc \
-    agenc-ota \
-"
+# OTA Updates (requires meta-rauc layer — enable when ready)
+# IMAGE_INSTALL += " \
+#     rauc \
+#     agenc-ota \
+# "
 
 # SSH access (Dropbear - lightweight, auto-starts on boot)
 IMAGE_INSTALL += " \

@@ -7,8 +7,8 @@ ConditionPathIsMountPoint=/data
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/mkdir -p /data/agenc /data/keystore /data/agenc/logs
-ExecStart=/bin/chmod 700 /data/keystore
+ExecStart=/bin/mkdir -p /data/agenc /data/keystore /data/agenc/logs /data/agenc/dropbear
+ExecStart=/bin/chmod 700 /data/keystore /data/agenc/dropbear
 
 [Install]
 WantedBy=multi-user.target

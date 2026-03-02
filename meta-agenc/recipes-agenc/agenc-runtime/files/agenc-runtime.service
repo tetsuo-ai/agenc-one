@@ -1,0 +1,41 @@
+[Unit]
+Description=AgenC ONE — Native Agent Runtime
+After=network-online.target sound.target agenc-data.mount
+Wants=network-online.target
+Requires=agenc-data.mount
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/agenc
+ExecStart=/usr/bin/python3 -u /opt/agenc/agenc_voice_task.py
+Restart=always
+RestartSec=3
+TimeoutStartSec=30
+TimeoutStopSec=10
+WatchdogSec=120
+
+# Environment
+Environment=HOME=/data/agenc
+Environment=AGENC_WALLET_PATH=/data/keystore/wallet.json
+Environment=AGENC_TASKS_FILE=/data/agenc/tasks.json
+Environment=AGENC_LOG_FILE=/data/agenc/agent.log
+EnvironmentFile=-/data/agenc/env
+
+# The agent IS the system — runs as root with full hardware access.
+# Security is enforced at the OS level:
+#   - Read-only rootfs (can't corrupt the system)
+#   - LUKS-encrypted keystore (can't extract keys)
+#   - nftables firewall (can't be reached from outside)
+#   - Signed OTA updates (can't install tampered code)
+
+# Resource guard (protect against runaway, not restrict the agent)
+MemoryMax=400M
+CPUQuota=95%
+
+# Agent is the most important process on this device
+OOMScoreAdjust=-900
+
+[Install]
+WantedBy=multi-user.target

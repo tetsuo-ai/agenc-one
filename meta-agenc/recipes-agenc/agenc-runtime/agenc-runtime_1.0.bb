@@ -8,6 +8,7 @@ SRC_URI = " \
     file://agenc_voice.py \
     file://agenchi_display.py \
     file://requirements.txt \
+    file://agenc-runtime.service \
 "
 
 RDEPENDS:${PN} = " \
@@ -19,7 +20,13 @@ RDEPENDS:${PN} = " \
     python3-websockets \
 "
 
+inherit systemd
+
+SYSTEMD_SERVICE:${PN} = "agenc-runtime.service"
+SYSTEMD_AUTO_ENABLE = "enable"
+
 do_install() {
+    # Agent runtime
     install -d ${D}/opt/agenc
     install -m 0755 ${WORKDIR}/agenc_voice_task.py ${D}/opt/agenc/
     install -m 0644 ${WORKDIR}/agenc_voice.py ${D}/opt/agenc/
@@ -28,13 +35,8 @@ do_install() {
 
     # systemd service
     install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${THISDIR}/../../recipes-core/systemd/agenc-runtime.service \
-        ${D}${systemd_system_unitdir}/agenc-runtime.service
+    install -m 0644 ${WORKDIR}/agenc-runtime.service ${D}${systemd_system_unitdir}/
 }
-
-inherit systemd
-SYSTEMD_SERVICE:${PN} = "agenc-runtime.service"
-SYSTEMD_AUTO_ENABLE = "enable"
 
 FILES:${PN} = " \
     /opt/agenc/* \

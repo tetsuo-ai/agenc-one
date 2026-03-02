@@ -1,5 +1,21 @@
 # Phase 2 Execution Plan — AgenC OS
 
+## Design Philosophy: Native Agent Integration
+
+The agent is not an application running on top of the OS — **the agent IS the OS**. AgenC OS exists for one purpose: to run the agent. Every design decision follows from this:
+
+- **Agent runs as root** — no sandboxed user, no capability restrictions, no filesystem jails. The agent has full control over the hardware it was built for.
+- **Direct hardware access** — GPIO, SPI, I2C, audio, display. No group membership hacks, no udev rules, no permission workarounds.
+- **System management** — the agent can restart WiFi, trigger OTA updates, manage Bluetooth, read system logs, and control its own lifecycle.
+- **Security through architecture, not isolation** — the OS protects itself through:
+  - Read-only rootfs (agent can't corrupt the system even as root)
+  - LUKS-encrypted keystore (wallet keys protected at rest)
+  - nftables firewall (network attack surface minimized)
+  - Signed OTA updates (can't install tampered code)
+  - A/B rollback (bad update = automatic recovery)
+
+This is the same model used by embedded systems, routers, and IoT devices: the firmware IS the application. Process-level sandboxing is for multi-tenant servers, not single-purpose hardware.
+
 ## Build Order (dependency chain)
 
 ```
@@ -78,3 +94,16 @@ meta-agenc/
 
 ### Step 9: Factory Provisioning (#12)
 - Flash script + keypair generation + QA check
+
+## Native Integration Checklist
+
+- [x] Agent runs as root (no sandboxed user)
+- [x] No ProtectSystem/ProtectHome/NoNewPrivileges restrictions
+- [x] Direct GPIO/SPI/I2C/audio access without group hacks
+- [x] OOMScoreAdjust=-900 (agent is highest priority process)
+- [x] Restart=always (agent must never stop running)
+- [x] Environment paths point to /data/ partition
+- [ ] Agent can trigger RAUC OTA updates
+- [ ] Agent can manage wpa_supplicant (WiFi config)
+- [ ] Agent can manage Bluetooth connections
+- [ ] Boot-to-agent time < 5 seconds

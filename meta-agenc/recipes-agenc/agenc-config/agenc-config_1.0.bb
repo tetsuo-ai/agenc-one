@@ -1,5 +1,5 @@
 SUMMARY = "AgenC ONE Device Configuration"
-DESCRIPTION = "Base configuration, user setup, and data partition mount for AgenC ONE"
+DESCRIPTION = "Base configuration and data partition mount for AgenC ONE"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c84e74ca1e4a5830e4dc9e7a7e91cf9b"
 
@@ -9,11 +9,10 @@ SRC_URI = " \
     file://agenc-user.conf \
 "
 
-inherit useradd systemd
+inherit systemd
 
-# Create agenc system user
-USERADD_PACKAGES = "${PN}"
-USERADD_PARAM:${PN} = "-r -d /data/agenc -s /bin/false -G gpio,spi,i2c,audio,video agenc"
+# No separate user — the agent runs as root.
+# This is a single-purpose device; the agent IS the system.
 
 SYSTEMD_SERVICE:${PN} = "agenc-data.mount agenc-dirs.service"
 SYSTEMD_AUTO_ENABLE = "enable"

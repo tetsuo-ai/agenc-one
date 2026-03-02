@@ -22,14 +22,14 @@ import speech_recognition as sr
 XAI_API_KEY = os.environ.get("XAI_API_KEY", "")
 GROK_MODEL = "grok-3-fast"
 LISTEN_SECONDS = 15
-WALLET_PATH = "/home/sa/.agenc/wallet.json"
+WALLET_PATH = os.environ.get("AGENC_WALLET_PATH", "/data/keystore/wallet.json")
 DEVNET_RPC = "https://api.devnet.solana.com"
 MEMO_PROGRAM_ID = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
 WS_URL = "wss://api.x.ai/v1/realtime"
 VOICE = "Ara"
 SAMPLE_RATE = 16000
-LOG_FILE = "/tmp/agenc_debug.log"
-TASKS_FILE = "/home/sa/.agenc/tasks.json"
+LOG_FILE = os.environ.get("AGENC_LOG_FILE", "/data/agenc/agent.log")
+TASKS_FILE = os.environ.get("AGENC_TASKS_FILE", "/data/agenc/tasks.json")
 
 W = 240
 H = 280

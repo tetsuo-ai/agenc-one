@@ -37,9 +37,10 @@ A phone is a shared environment — notifications, battery optimization, backgro
 AGENC ONE is a **dedicated execution environment**:
 
 - **Always on** — 24/7 uptime, no OS killing your process
-- **Isolated keys** — hardware-bound Solana keypair, not in a shared keychain
+- **Native integration** — the agent IS the OS, not an app running on top of it. Root access, direct hardware control, system management
+- **Isolated keys** — hardware-bound Solana keypair in LUKS-encrypted keystore
 - **Independent network** — own RPC connection, own voice pipeline, own task lifecycle
-- **No gatekeepers** — no app store review, no platform restrictions
+- **No gatekeepers** — no app store review, no platform restrictions, no sandboxing
 
 A phone app asks permission to run. A device just runs.
 
@@ -75,20 +76,23 @@ Voice → STT → LLM Task Processing → Execution → Solana Memo TX (proof)
 
 ## Architecture
 
+The agent runs as root — natively integrated into the OS, not sandboxed on top of it. Security comes from the OS architecture (read-only rootfs, LUKS keystore, signed OTA, firewall), not from restricting the agent.
+
 ```mermaid
 graph TD
     A[AGENC ONE] --> B[Voice Pipeline]
-    A --> C[Agent Runtime]
+    A --> C[Agent Runtime · root · PID 1 priority]
     A --> D[Solana Client]
 
     B --> |STT| C
     C --> |TX| D
 
-    B -.- E[Mic + PTT Button]
+    B -.- E[Mic + PTT Button · direct GPIO/SPI]
     C -.- F[LLM Engine · Grok / xAI]
     D -.- G[RPC Node]
 
-    C --> H[Encrypted Keystore · Wallet]
+    C --> H[LUKS Keystore · Wallet]
+    C --> P[System Control · WiFi · OTA · Services]
     H --> D
 
     D --> I
@@ -105,6 +109,7 @@ graph TD
     style B fill:#16213e,stroke:#0f3460,color:#fff
     style C fill:#16213e,stroke:#0f3460,color:#fff
     style D fill:#16213e,stroke:#0f3460,color:#fff
+    style P fill:#16213e,stroke:#0f3460,color:#fff
     style E fill:#0f0f23,stroke:#533483,color:#aaa
     style F fill:#0f0f23,stroke:#533483,color:#aaa
     style G fill:#0f0f23,stroke:#533483,color:#aaa
@@ -126,10 +131,11 @@ Voice-to-chain pipeline validated on Raspberry Pi with live devnet transactions.
 
 ### Phase 2 — AgenC OS &checkmark;
 
-Custom Linux distribution purpose-built for agent execution. Yocto Scarthgap 5.0.16 running on Pi Zero 2W.
+Custom Linux distribution purpose-built for agent execution. Yocto Scarthgap 5.0.16 running on Pi Zero 2W. The agent is natively integrated — runs as root with full hardware access, not as a sandboxed application.
 
 - [x] Yocto-based minimal image (~1.5GB image, minimal rootfs)
 - [x] Read-only root filesystem
+- [x] Native agent integration (root process, direct hardware, system control)
 - [x] Secure boot chain
 - [x] Signed OTA updates with A/B rollback
 - [x] Zero unnecessary services (no package manager, no GUI, no bloat)

@@ -1,3 +1,5 @@
 # AgenC OS Dropbear configuration
-# Port 22, root login allowed, password + key auth
-DROPBEAR_EXTRA_ARGS="-B"
+# Override default -w flag to allow root SSH login
+# Keys are generated in /etc/dropbear via standard dropbearkey.service
+# (volatile-binds makes /etc/dropbear writable on read-only rootfs)
+DROPBEAR_EXTRA_ARGS=""

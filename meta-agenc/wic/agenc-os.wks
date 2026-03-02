@@ -2,11 +2,9 @@
 # p1: boot (FAT32) - kernel, DTBs, firmware
 # p2: rootfs A (ext4, read-only) - active system
 # p3: rootfs B (ext4, read-only) - OTA slot
-# p4: data (ext4, read-write) - agent state, logs, env
-# p5: keystore (LUKS encrypted) - wallet keys
+# p4: data (ext4, read-write) - agent state, logs, env, keystore
 
 part /boot --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4096 --size 64
 part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label rootfs-a --align 4096 --size 512
 part --ondisk mmcblk0 --fstype=ext4 --label rootfs-b --align 4096 --size 512
 part /data --ondisk mmcblk0 --fstype=ext4 --label data --align 4096 --size 256
-part --ondisk mmcblk0 --fstype=ext4 --label keystore --align 4096 --size 32

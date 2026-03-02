@@ -134,13 +134,17 @@ Voice-to-chain pipeline validated on Raspberry Pi with live devnet transactions.
 Custom Linux distribution purpose-built for agent execution. Yocto Scarthgap 5.0.16 running on Pi Zero 2W. The agent is natively integrated — runs as root with full hardware access, not as a sandboxed application.
 
 - [x] Yocto-based minimal image (~1.5GB image, minimal rootfs)
-- [x] Read-only root filesystem
+- [x] Read-only root filesystem with volatile-binds
 - [x] Native agent integration (root process, direct hardware, system control)
-- [x] Secure boot chain
-- [x] Signed OTA updates with A/B rollback
+- [x] SSH access via Dropbear (socket-activated, works out of the box)
 - [x] Zero unnecessary services (no package manager, no GUI, no bloat)
-- [x] SSH access via Dropbear
-- [ ] Encrypted key storage
+- [x] Custom boot splash with AGENC logo
+- [x] Hostname and OS branding (serial console + SSH MOTD)
+- [x] nftables firewall (inbound blocked except SSH)
+- [x] A/B partition layout ready for OTA
+- [x] Persistent /data partition for agent state
+- [ ] Signed OTA updates via RAUC
+- [ ] LUKS-encrypted keystore partition
 - [ ] Boot to agent in 3-5 seconds
 
 ### Phase 3 — Custom Hardware
@@ -175,38 +179,39 @@ Purpose-designed board with Western supply chain (80%+ US/EU sourced components)
 
 ### Prerequisites
 
-- Docker (for Yocto build)
-- Raspberry Pi Imager (for flashing)
+- Linux host or VM (Lima recommended for macOS)
+- ~50GB disk space for Yocto build
 - microSD card (16GB+)
 
 ### Build
 
 ```bash
-cd yocto
-./build.sh
+# Source Yocto build environment
+cd poky
+source oe-init-build-env /path/to/build
+
+# Build the image
+bitbake agenc-os-image
 ```
 
-The build runs inside Docker and produces `agenc-os.wic` — a raw disk image targeting the Raspberry Pi Zero 2W (BCM2710, aarch64).
+Output: `tmp/deploy/images/raspberrypi0-2w-64/agenc-os-image-raspberrypi0-2w-64.rootfs.wic.bz2`
 
 ### Flash
 
-1. Open **Raspberry Pi Imager**
-2. OS → **Use custom** → select `agenc-os.wic`
-3. Storage → select your SD card
-4. Write
+```bash
+bunzip2 agenc-os-image-*.wic.bz2
+sudo dd if=agenc-os-image-*.wic of=/dev/rdiskN bs=4m status=progress
+```
 
 ### First Boot
 
-AgenC OS boots to a minimal shell. To enable SSH:
-
-```bash
-sh /boot/dropbear/start-dropbear.sh
-```
-
-Then connect from any machine on the LAN:
+1. Insert SD card into Pi Zero 2W
+2. Connect ethernet via USB adapter
+3. Power on — SSH is available immediately
 
 ```bash
 ssh root@<pi-ip-address>
+# Password: agenc
 ```
 
 See [`docs/AGENC-OS-SETUP.md`](docs/AGENC-OS-SETUP.md) for detailed setup instructions.

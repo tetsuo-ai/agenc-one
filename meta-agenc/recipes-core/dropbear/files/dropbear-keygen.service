@@ -2,6 +2,7 @@
 Description=Generate Dropbear SSH host keys on first boot
 After=agenc-dirs.service
 Requires=agenc-data.mount
+Before=dropbear.service
 ConditionPathExists=!/data/agenc/dropbear/dropbear_ecdsa_host_key
 
 [Service]

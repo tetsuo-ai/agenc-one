@@ -2,7 +2,10 @@ SUMMARY = "AgenC OS - Minimal agent execution image"
 DESCRIPTION = "Purpose-built Linux image for AGENC ONE AI agent device"
 LICENSE = "MIT"
 
-inherit core-image
+inherit core-image extrausers
+
+# Default root password: "agenc" — change on first login or via factory provisioning
+EXTRA_USERS_PARAMS = "usermod -p '\$6\$agencone\$gDsm4uDoJt35KiaRCEdmAir8my1RVn0fxis8dhvIulD8L0VLFf2jvn0exK3UvSnIdcKWZ3K8IaKZj3d29GMwH.' root;"
 
 # Base system
 IMAGE_INSTALL += " \
@@ -64,19 +67,29 @@ IMAGE_INSTALL += " \
     agenc-ota \
 "
 
+# SSH access (Dropbear - lightweight, auto-starts on boot)
+IMAGE_INSTALL += " \
+    dropbear \
+"
+
+# Allow root SSH login
+IMAGE_FEATURES += "allow-root-login"
+
 # System management
 IMAGE_INSTALL += " \
     systemd \
     systemd-analyze \
     less \
     nano \
+    htop \
+    util-linux \
 "
 
 # Read-only root
 IMAGE_FEATURES += "read-only-rootfs"
 
-# Remove unnecessary features
-IMAGE_FEATURES:remove = "splash"
+# Boot splash: AGENC logo on black background
+IMAGE_FEATURES += "splash"
 BAD_RECOMMENDATIONS += "shared-mime-info"
 
 # Image size control

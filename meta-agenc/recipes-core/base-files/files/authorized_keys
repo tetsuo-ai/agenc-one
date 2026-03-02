@@ -1,0 +1,2 @@
+# Add your SSH public key here during factory provisioning
+# Or use: ssh-copy-id root@agenc-one.local

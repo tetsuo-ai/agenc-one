@@ -44,6 +44,7 @@ IMAGE_INSTALL += " \
     libgpiod-tools \
     i2c-tools \
     python3-spidev \
+    python3-gpiod \
 "
 
 # Security

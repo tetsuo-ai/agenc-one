@@ -1,0 +1,15 @@
+[Unit]
+Description=AgenC Boot Splash — Logo + Loading Animation
+DefaultDependencies=no
+After=local-fs.target
+Before=agenc-runtime.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /opt/agenc/agenc-splash.py
+Restart=no
+TimeoutStartSec=5
+TimeoutStopSec=3
+
+[Install]
+WantedBy=sysinit.target

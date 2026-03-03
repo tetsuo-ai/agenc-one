@@ -1,0 +1,15 @@
+[Unit]
+Description=AgenC Boot Logo on HDMI
+DefaultDependencies=no
+After=systemd-vconsole-setup.service
+Before=getty@tty1.service
+ConditionPathExists=/dev/fb0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/agenc/agenc-boot-splash.py
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=sysinit.target

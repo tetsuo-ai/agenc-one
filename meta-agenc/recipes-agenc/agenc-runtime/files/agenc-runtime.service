@@ -1,14 +1,16 @@
 [Unit]
 Description=AgenC ONE — Native Agent Runtime
-After=network-online.target sound.target agenc-data.mount
-Wants=network-online.target
-Requires=agenc-data.mount
+After=network.target sound.target local-fs.target
+Wants=network.target
+Requires=local-fs.target
 StartLimitIntervalSec=300
 StartLimitBurst=5
 
 [Service]
 Type=simple
 WorkingDirectory=/opt/agenc
+ExecStartPre=-/bin/sleep 3
+ExecStartPre=-/bin/systemctl stop agenc-splash.service
 ExecStart=/usr/bin/python3 -u /opt/agenc/agenc_voice_task.py
 Restart=always
 RestartSec=3

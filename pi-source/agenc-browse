@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""agenc-browse - Fetch webpage content via Cloudflare Browser Rendering API.
+
+Usage: agenc-browse <url>
+
+Requires CF_ACCOUNT_ID and CF_API_TOKEN environment variables,
+or set them in /data/agenc/env:
+  CF_ACCOUNT_ID=your_account_id
+  CF_API_TOKEN=your_api_token
+"""
+import sys, json, urllib.request, re, os
+
+# Load from env or /data/agenc/env file
+CF_ACCOUNT_ID = os.environ.get("CF_ACCOUNT_ID", "")
+CF_API_TOKEN = os.environ.get("CF_API_TOKEN", "")
+
+if not CF_ACCOUNT_ID or not CF_API_TOKEN:
+    try:
+        with open("/data/agenc/env") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("CF_ACCOUNT_ID="):
+                    CF_ACCOUNT_ID = _line.split("=", 1)[1]
+                elif _line.startswith("CF_API_TOKEN="):
+                    CF_API_TOKEN = _line.split("=", 1)[1]
+    except Exception:
+        pass
+
+if not CF_ACCOUNT_ID or not CF_API_TOKEN:
+    print("Error: CF_ACCOUNT_ID and CF_API_TOKEN required (env or /data/agenc/env)")
+    sys.exit(1)
+
+CF_API_URL = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/browser-rendering/content"
+
+def extract_meta(html):
+    """Extract useful meta tags (title, description, og)."""
+    parts = []
+    m = re.search(r'<title[^>]*>([^<]+)</title>', html, re.IGNORECASE)
+    if m: parts.append(m.group(1).strip())
+    for pattern in [
+        r'<meta\s+name="description"\s+content="([^"]+)"',
+        r'<meta\s+property="og:description"\s+content="([^"]+)"',
+        r'<meta\s+name="twitter:description"\s+content="([^"]+)"',
+    ]:
+        m = re.search(pattern, html, re.IGNORECASE)
+        if m:
+            val = m.group(1).strip()
+            if val and val not in parts:
+                parts.append(val)
+                break
+    return parts
+
+def strip_html(html):
+    """Extract readable text from HTML."""
+    html = re.sub(r'<(script|style|noscript|head)[^>]*>.*?</\1>', '', html, flags=re.DOTALL|re.IGNORECASE)
+    html = re.sub(r'<br\s*/?\s*>', '\n', html, flags=re.IGNORECASE)
+    html = re.sub(r'</(p|div|h[1-6]|li|tr)>', '\n', html, flags=re.IGNORECASE)
+    text = re.sub(r'<[^>]+>', ' ', html)
+    text = text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ').replace('&#39;', "'").replace('&quot;', '"')
+    lines = [l.strip() for l in text.splitlines()]
+    text = '\n'.join(l for l in lines if l)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+def browse(url):
+    payload = json.dumps({
+        "url": url,
+        "gotoOptions": {"waitUntil": "networkidle0"},
+    }).encode("utf-8")
+    req = urllib.request.Request(CF_API_URL, data=payload, method="POST")
+    req.add_header("Authorization", f"Bearer {CF_API_TOKEN}")
+    req.add_header("Content-Type", "application/json")
+
+    try:
+        with urllib.request.urlopen(req, timeout=45) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+        try:
+            data = json.loads(raw)
+            if data.get("success"):
+                html = data.get("result", "")
+                meta = extract_meta(html)
+                body = strip_html(html)
+                if body and len(body) > 50:
+                    text = body
+                elif meta:
+                    text = '\n'.join(meta)
+                    if body:
+                        text += '\n' + body
+                else:
+                    text = body or "(empty page)"
+                return text[:3000]
+            else:
+                errors = data.get("errors", [])
+                return f"Error: {errors}"
+        except json.JSONDecodeError:
+            meta = extract_meta(raw)
+            body = strip_html(raw)
+            text = '\n'.join(meta) + ('\n' + body if body else '') if meta else body
+            return (text or "(empty page)")[:3000]
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:500]
+        return f"Error {e.code}: {body}"
+    except Exception as e:
+        return f"Error: {e}"
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: agenc-browse <url>")
+        sys.exit(1)
+    url = sys.argv[1]
+    if not url.startswith("http"):
+        url = "https://" + url
+    print(browse(url))
